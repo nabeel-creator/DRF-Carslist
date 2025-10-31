@@ -2,11 +2,12 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import CarList, showroom, Review
 from serializerR.serializers import Carserializer, ShowroomSerializer, ReviewSerializer
+from serializerR.permissions import isOwnerOrReadOnly, adminorReadonly
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, mixins, generics, viewsets
 from rest_framework.views import APIView
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, NotFound
 
@@ -34,6 +35,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [isOwnerOrReadOnly]
 
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
@@ -91,6 +93,8 @@ class ReviewList(generics.ListAPIView):
 
 
 class showroom_view(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [isOwnerOrReadOnly]
     queryset = showroom.objects.all()
     serializer_class = ShowroomSerializer
 
@@ -119,8 +123,7 @@ class showroom_view(viewsets.ModelViewSet):
 
 
 class showroomList(APIView):
-    authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         showrooms = showroom.objects.all()
         serializer = ShowroomSerializer(showrooms, many=True, context={'request': request})
@@ -134,6 +137,8 @@ class showroomList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class showroom_details(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [adminorReadonly]
     def get(self, request, pk):
         try:
             showroom_instance = showroom.objects.get(pk=pk)
@@ -168,6 +173,7 @@ class showroom_details(APIView):
 
 @api_view(['GET', 'POST'])
 def list_cars(request):
+    
     if request.method == 'GET':
         cars = CarList.objects.all()
         serializer = Carserializer(cars, many=True)

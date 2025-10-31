@@ -23,6 +23,7 @@ class CarList(models.Model):
     year = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     Active = models.BooleanField(default = True)
+    features = models.TextField(max_length=500, null=True, blank=True)
     chassinumber = models.CharField(max_length=100, null=True, blank=True, validators=[chassivalidator])
     showroom = models.ForeignKey("showroom", on_delete=models.CASCADE, null=True, related_name="showrooms")
 
