@@ -1,15 +1,22 @@
 from rest_framework import serializers
-from car.models import CarList, showroom, Review
+from car.models import CarList, showroom, Review, CarImage, Booking
 from decimal import Decimal
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     api_user = serializers.StringRelatedField(read_only=True)
+    user = serializers.CharField(source='api_user.username', read_only=True)
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id', 'comment', 'rating', 'user', 'car','api_user', 'created_at']
+        read_only_fields = ['user']
         # exclude = ('car',)
 
+class BookingSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    class Meta:
+        model= Booking
+        fields='__all__'
 
 class ShowroomSerializer(serializers.ModelSerializer):
     showrooms = serializers.PrimaryKeyRelatedField(
@@ -20,12 +27,20 @@ class ShowroomSerializer(serializers.ModelSerializer):
         model = showroom
         fields = '__all__'
 
+
+class CarImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarImage
+        fields = ['image']
+
 class Carserializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     discounted_price = serializers.SerializerMethodField()
+    images = CarImageSerializer(many=True, read_only=True)
     class Meta:
         model = CarList
-        fields = '__all__'
+       
+        fields = ['id', 'name', 'model', 'year', 'price', 'Active', 'features', 'images','discounted_price', 'chassinumber', 'showroom', 'reviews']
         # exclude = ['id']
     # id = serializers.IntegerField(read_only=True)
     # name = serializers.CharField(max_length=100)

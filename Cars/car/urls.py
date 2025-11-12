@@ -15,5 +15,7 @@ urlpatterns=[
     # path('reviews/<int:pk>/', views.ReviewDetail.as_view(), name='review_detail'),
     path('showroom/<int:showroom_pk>/reviews/', views.ReviewList.as_view(), name='car_review_list'),
     path('showroom/<int:showroom_pk>/reviews-create/', views.ReviewCreate.as_view(), name='car_review_create'),
-    path('showroom/reviews/<int:pk>/', views.ReviewDetail.as_view(), name='car_review_detail')
+    path('showroom/reviews/<int:pk>/', views.ReviewDetail.as_view(), name='car_review_detail'),
+    path('booking/my/', views.UserBookingList.as_view(), name='user_booking_list'),
+    path('booking/create/', views.BookingCreate.as_view(), name='booking_create'),
 ]

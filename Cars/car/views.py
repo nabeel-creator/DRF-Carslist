@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import CarList, showroom, Review
-from serializerR.serializers import Carserializer, ShowroomSerializer, ReviewSerializer
+from .models import CarList, showroom, Review, Booking
+from serializerR.serializers import Carserializer, ShowroomSerializer, ReviewSerializer, BookingSerializer
 from serializerR.permissions import isOwnerOrReadOnly, adminorReadonly
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -32,6 +32,19 @@ from rest_framework.exceptions import ValidationError, NotFound
 #         return JsonResponse(data)
 #     except CarList.DoesNotExist:
 #         return JsonResponse({'error': 'Car not found'}, status=404)
+
+class UserBookingList(generics.ListAPIView):
+    serializer_class = BookingSerializer
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
+
+class BookingCreate(generics.CreateAPIView):
+    serializer_class = BookingSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)  
+
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -41,41 +54,38 @@ class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
 
     def perform_create(self, serializer):
-        """
-        Expect request.data to include the car id (key: 'car' or 'car_id').
-        The URL provides showroom_pk so we validate the car belongs to that showroom.
-        """
-        def get_queryset(self):
-            return Review.objects.all()
-        
         showroom_pk = self.kwargs.get('showroom_pk')
         car_id = self.request.data.get('car') or self.request.data.get('car_id')
-        useredit = self.request.user
-        review_queryset = Review.objects.filter(car=car, api_user=useredit)
-        if review_queryset.exists():
-            raise ValidationError({'detail': 'You have already reviewed this car.'})
+        user = self.request.user
+
         if not car_id:
             raise ValidationError({'car': 'This field is required.'})
 
+        # Make sure the car belongs to this showroom
         try:
             car = CarList.objects.get(pk=car_id, showroom_id=showroom_pk)
         except CarList.DoesNotExist:
             raise ValidationError({'car': 'Car not found in this showroom.'})
 
-        serializer.save(car=car, api_user=useredit)
+        # Prevent duplicate review from same user for the same car
+        if Review.objects.filter(car=car, api_user=user).exists():
+            raise ValidationError({'detail': 'You have already reviewed this car.'})
+
+        serializer.save(car=car, api_user=user)
 
 class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        """
-        Return reviews for all cars in the given showroom (showroom_pk from URL).
-        """
         showroom_pk = self.kwargs.get('showroom_pk')
-        if showroom_pk is None:
-            raise NotFound('showroom_pk not provided in URL.')
-        return Review.objects.filter(car__showroom_id=showroom_pk)
+        car_id = self.request.query_params.get('car_id', None)
 
+        queryset = Review.objects.filter(car__showroom_id=showroom_pk)
+
+        if car_id:
+            queryset = queryset.filter(car_id=car_id)
+
+        return queryset
 
 # class ReviewList(mixins.ListModelMixin,
 #                  mixins.CreateModelMixin, 
