@@ -24,11 +24,20 @@ class CarList(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     Active = models.BooleanField(default=True)
     features = models.JSONField(null=True, blank=True)  
+    description = models.TextField(null=True, blank=True)
     chassinumber = models.CharField(max_length=100, null=True, blank=True, validators=[chassivalidator])
     showroom = models.ForeignKey("showroom", on_delete=models.CASCADE, null=True, related_name="cars")
 
     def __str__(self):
         return f"{self.name} - {self.model}"
+
+class CarImage(models.Model):
+    car = models.ForeignKey(CarList, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="car_images/")
+
+    def __str__(self):
+        return f"Image for {self.car.name}"
+
 
 class Review(models.Model):
     car = models.ForeignKey(CarList, on_delete=models.CASCADE, related_name="reviews")
@@ -40,12 +49,6 @@ class Review(models.Model):
     def __str__(self):
         return f"Review for {self.car.name} -- Rating: {self.rating}"
 
-class CarImage(models.Model):
-    car = models.ForeignKey(CarList, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="car_images/")
-
-    def __str__(self):
-        return f"Image for {self.car.name}"
 
 class Booking(models.Model):
     car = models.ForeignKey(CarList, on_delete=models.CASCADE)
@@ -53,4 +56,5 @@ class Booking(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+
     

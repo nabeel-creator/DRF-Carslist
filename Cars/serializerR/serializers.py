@@ -40,7 +40,7 @@ class Carserializer(serializers.ModelSerializer):
     class Meta:
         model = CarList
        
-        fields = ['id', 'name', 'model', 'year', 'price', 'Active', 'features', 'images','discounted_price', 'chassinumber', 'showroom', 'reviews']
+        fields = ['id', 'description','name', 'model', 'year', 'price', 'Active', 'features', 'images','discounted_price', 'chassinumber', 'showroom', 'reviews']
         # exclude = ['id']
     # id = serializers.IntegerField(read_only=True)
     # name = serializers.CharField(max_length=100)

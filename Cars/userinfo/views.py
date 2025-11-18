@@ -18,6 +18,11 @@ from rest_framework.authentication import TokenAuthentication
 #         serializer.save()
 #         return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
 #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ViewUser(generics.RetrieveAPIView):
+    serializer_class = RegestraSerializer
+
+    def get_object(self):
+        return self.request.user
 
 class RegisterUser(generics.CreateAPIView):
     serializer_class = RegestraSerializer

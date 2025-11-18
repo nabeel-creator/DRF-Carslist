@@ -19,7 +19,6 @@ class RegestraSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # remove confirmation before creating user
         validated_data.pop('password_confirmation', None)
         password = validated_data.pop('password')
         user = User(**validated_data)
