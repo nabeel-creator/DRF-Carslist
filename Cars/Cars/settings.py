@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Use environment variables
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-arg4up(m&e)irsam$#r$n+$9g-mvqj)g&51+!i9c-59xg@049q')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = 'True'
 
 
 ALLOWED_HOSTS = [
@@ -150,5 +150,5 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
